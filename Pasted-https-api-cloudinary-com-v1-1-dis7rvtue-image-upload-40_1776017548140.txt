@@ -1,0 +1,46 @@
+https://api.cloudinary.com/v1_1/dis7rvtue/image/upload 400 (Bad Request)
+s.fetch @ requests.js:1
+(anonymous) @ 200.js:1
+fetch @ 200.js:1
+(anonymous) @ cloudinary.ts:10
+(anonymous) @ Products.tsx:74
+executeDispatch @ react-dom_client.js?v=839c8b80:11736
+runWithFiberInDEV @ react-dom_client.js?v=839c8b80:1485
+processDispatchQueue @ react-dom_client.js?v=839c8b80:11772
+(anonymous) @ react-dom_client.js?v=839c8b80:12182
+batchedUpdates$1 @ react-dom_client.js?v=839c8b80:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=839c8b80:11877
+dispatchEvent @ react-dom_client.js?v=839c8b80:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=839c8b80:14773
+<input>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=839c8b80:250
+_c @ input.tsx:8
+react-stack-bottom-frame @ react-dom_client.js?v=839c8b80:17424
+renderWithHooks @ react-dom_client.js?v=839c8b80:4206
+updateForwardRef @ react-dom_client.js?v=839c8b80:6461
+beginWork @ react-dom_client.js?v=839c8b80:7864
+runWithFiberInDEV @ react-dom_client.js?v=839c8b80:1485
+performUnitOfWork @ react-dom_client.js?v=839c8b80:10868
+workLoopSync @ react-dom_client.js?v=839c8b80:10728
+renderRootSync @ react-dom_client.js?v=839c8b80:10711
+performWorkOnRoot @ react-dom_client.js?v=839c8b80:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=839c8b80:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=839c8b80:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=839c8b80:11558
+(anonymous) @ react-dom_client.js?v=839c8b80:11649
+<Input>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=839c8b80:250
+(anonymous) @ Products.tsx:247
+react-stack-bottom-frame @ react-dom_client.js?v=839c8b80:17424
+renderWithHooks @ react-dom_client.js?v=839c8b80:4206
+updateFunctionComponent @ react-dom_client.js?v=839c8b80:6619
+beginWork @ react-dom_client.js?v=839c8b80:7654
+runWithFiberInDEV @ react-dom_client.js?v=839c8b80:1485
+performUnitOfWork @ react-dom_client.js?v=839c8b80:10868
+workLoopSync @ react-dom_client.js?v=839c8b80:10728
+renderRootSync @ react-dom_client.js?v=839c8b80:10711
+performWorkOnRoot @ react-dom_client.js?v=839c8b80:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=839c8b80:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=839c8b80:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=839c8b80:11558
+(anonymous) @ react-dom_client.js?v=839c8b80:11649Understand this error

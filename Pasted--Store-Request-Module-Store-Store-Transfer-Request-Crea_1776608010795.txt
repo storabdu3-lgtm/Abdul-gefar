@@ -1,0 +1,111 @@
+🧾 Store Request Module (Store → Store Transfer Request)
+Create Request
+Select From Store
+Select To Store
+Smart Product Search + Barcode Scanner
+Show for every product:
+Product Photo
+Product Name
+Product Code
+Category
+Price
+Carton / Per Piece
+Available Balance in both stores
+Add multiple products in one request
+Request by Carton or Pieces
+Save Request
+After Save
+Professional Request Receipt
+Share
+Print
+Receipt shows product photos
+Workflow Buttons
+Approve (by Admin)
+After approval → Received button appears
+Receipt must show:
+Approved By (Username/Admin)
+Received By (Username/Admin)
+Permissions after approval
+❌ No Edit
+❌ No Delete
+✅ View
+✅ Void
+🎟 Request Voucher Module
+Auto Voucher ID (starts from 1)
+Voucher created when Request is saved
+When Approved → Received button shows
+When Received → stock transfers to destination store automatically
+📥 Binning / Import Module (Excel → System)
+Table columns:
+Store Name
+Product Name
+Product Code
+Category
+Carton / Per Piece
+Carton Quantity
+Price
+Features:
+Import from Excel
+Table preview before save
+Approve button
+On approve → updates all product balances per store
+🏦 Account Module
+Account Creation
+Bank Name
+Person Name
+Account Number
+Account Voucher
+Create / Edit / Delete View voucher
+Shows:
+Date
+Photo
+FS Number
+Full transaction history per account
+🎯 Promotion Module (E-commerce Integrated)
+Smart Product Search (shows photos)
+Select products for promotion
+Add:
+Description
+Link
+Photo highlight
+Shows on E-commerce:
+Header banner
+Popup notification
+Product highlight card
+🛒 Sold Product Module (Direct Sale from Store)
+Search Product
+Record:
+Sold By (Username)
+Carton / Pieces quantity
+Multiple products per sale
+Save → Professional Receipt (Share/Print)
+Automatically reduces store balance
+⚙️ Admin & User Settings
+User Settings
+Username / Password edit
+Language: Amharic / English
+E-commerce Settings
+Logo upload
+Website Name
+Font style / size
+Menu style
+Color theme
+Edit all website texts
+🧾 Receipts (All Modules)
+Every receipt in the system must support:
+Product Photos
+Share
+Print
+Professional table layout
+Username tracking (who did what)
+🔎 Smart Search Everywhere
+In:
+Request
+Promotion
+Sold Product
+Import
+E-commerce
+Must include:
+Barcode Scanner
+Product Photo
+Instant search

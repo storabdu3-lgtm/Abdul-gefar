@@ -1,0 +1,224 @@
+[4/12/2026 1:28 AM] Eliyas: Build me a modern, standards-compliant Multi-Store E-commerce + Inventory Management System using Node.js + Express (Backend and Frontend) with the following features:
+🛒 E-commerce (Customer Side)
+Customers can order by simply tapping the product photo
+The product photo must display: 
+Price
+Description
+After checkout, generate a professional receipt with a table layout
+Receipt options: Print / Share / Save
+All ordered items must automatically be recorded into the Inventory Management System as an Order Voucher
+Product availability on E-commerce must come from Inventory balance: 
+If balance = 0 → Do not show on E-commerce
+If balance ≥ 1 → Show on E-commerce
+A button to navigate from E-commerce → Inventory System
+📦 Product Management (Inventory)
+For each product, I want to register:
+Product Name
+Product Code
+Quantity inside one carton
+Minimum carton quantity alert
+Product photo upload
+Save product
+Generated Barcode from the saved code
+A Product Voucher with a professional ID
+Voucher actions: View / Edit / Void / Delete
+🗂 Category Management
+Register Category Names
+View all products inside a category with full detail
+Smart Search
+🏬 Store Management (Multi-Store)
+Register Store: 
+Store name
+Level
+Address
+Store Voucher
+When clicking the voucher → show full store transaction history
+🚚 Supplier Management
+Register supplier: 
+Name
+Address
+Phone
+View / Edit / Delete
+Record payments made to suppliers
+Record remaining balances
+Upload photo proof of payment
+📥 Stock In (Goods Receiving)
+When registering stock in:
+Search and select: 
+Supplier
+Store
+Category
+Product
+Show product photo and carton quantity
+Enter: 
+Number of cartons received
+Unit price per item
+System calculates: 
+Carton price = unit price × items per carton
+Fields: 
+Remark
+FS Number
+Ability to register multiple products at once in a professional table
+Table columns: 
+Product name
+Items per carton
+Number of cartons
+Unit price
+Total price (calculated)
+Show: 
+Total cartons
+Total price
+Record payment made and remaining balance
+Upload photo proof
+Generate professional receipt with: 
+Print / Share / Export to Excel
+💲 Pricing Management
+Add profit margin to unit cost
+Professional price form
+Saving price updates: 
+Selling price
+Updates E-commerce price automatically
+Edit / Delete prices
+👤 Customer Management
+Register customer: 
+Name
+Address
+Phone
+Customer Voucher
+Voucher shows full payment transaction history
+Voucher actions: View (Print/Share), Edit, Void, Delete
+🧾 Order Voucher (From E-commerce)
+Convert E-commerce orders into Voucher with Voucher ID
+View as professional receipt
+Add Approval system: 
+Allow → Convert to POS Sale
+Deny → Cancel
+🧮 POS Sales
+Search customer from registered list
+Select store
+Search product by: 
+Product code
+Barcode scanner
+Show: 
+Product name
+Items per carton
+Product photo
+Remaining stock in selected store
+Selling price
+Allow price adjustment (increase/decrease)
+Choose to sell: 
+By carton
+By single item
+Add multiple products in a professional table
+Add remark
+Payment methods: 
+Cash
+Transfer (with photo proof)
+Credit (record paid and remaining)
+Generate professional receipt table
+Record under customer name with Sales Voucher ID
+Voucher actions: View / Edit / Void / Delete
+🔁 Product Request (Between Stores)
+Search store and view product balance and details
+Sort products
+Request out-of-stock items from another store
+Generate Request Voucher with ID
+View as professional receipt
+Voucher actions: View / Edit / Void / Delete
+📊 Payment Statement
+Full detailed customer payment transactions
+Smart search
+Dynamic statement
+Each statement: Print / Share / Export to Excel
+[4/12/2026 1:33 AM] Eliyas: 🔄 Store → Store Transfer (Transfer Voucher)
+Process
+Select From Store and To Store
+Search product by: 
+Product code
+Barcode scanner
+Show automatically: 
+Product name
+Product photo
+Items per carton
+Available quantity in the selected store
+Product price
+Allow adding multiple products at once into a professional table
+On Save
+Generate Transfer Voucher ID
+Produce professional receipt (table format)
+Actions: View / Edit / Void / Delete
+Options: Share / Print
+⚠️ Damage / Return Registration
+Register damage/return: 
+By single item or carton
+Professional form
+Add multiple products in table
+On save: 
+Generate professional receipt
+Options: Share / Print
+💸 Expenses Registration
+Professional form to record expenses: 
+By single or carton (if product related)
+Or general expense
+On save: 
+Professional table receipt
+Share / Print
+🏪 Store Balance Viewer
+Select a store
+Search product
+Show in a full detailed table: 
+Product image
+Product name
+Quantity balance
+Options: Share / Print / Export to Excel
+🗃 Bincard (Stock Card)
+Professional Bincard
+For each product, show full movement history:
+Stock In
+Sales
+Transfer In
+Transfer Out
+Damage
+Return
+With:
+Smart Search
+Share / Print / Export to Excel
+Bincard Summary
+Summarized version of stock movement per product
+Professional format
+Share / Print / Export to Excel
+📑 Reports Module (Advanced Reporting)
+Professional Reports Including
+Profit & Loss
+Movement of goods
+Income & Expenses statement
+Statement Filters
+Daily
+Weekly
+Monthly
+Yearly
+Smart Search by: 
+Product
+Store
+Category
+Date range
+Output Options
+Share
+Print
+Export to Excel
+🔎 Where You Can Use Smart Search
+Smart search will be available in:
+Products
+Categories
+Stores
+Suppliers
+Customers
+Stock In
+POS Sales
+Transfers
+Damage/Return
+Expenses
+Bincard
+Reports
+Payment Statements
+Store Balance Viewer
