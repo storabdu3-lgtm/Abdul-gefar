@@ -1,31 +1,26 @@
-'use client';
+import { toast } from 'sonner';
+import { Button } from '../../components/ui/button';
+import { Toaster } from '../../components/ui/sonner';
+import { Row } from '../parts';
 
-import { useTheme } from 'next-themes';
-import { Toaster as Sonner } from 'sonner';
-
-type ToasterProps = React.ComponentProps<typeof Sonner>;
-
-const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = 'system' } = useTheme();
-
+export function SonnerDemo() {
   return (
-    <Sonner
-      theme={theme as ToasterProps['theme']}
-      className="toaster group"
-      toastOptions={{
-        classNames: {
-          toast:
-            'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
-          description: 'group-[.toast]:text-muted-foreground',
-          actionButton:
-            'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
-          cancelButton:
-            'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
-        },
-      }}
-      {...props}
-    />
+    <div className="rounded-xl border bg-card p-6">
+      <Row label="Notifications">
+        <Button onClick={() => toast.success('Project published')}>Success</Button>
+        <Button
+          variant="outline"
+          onClick={() =>
+            toast('Invitation sent', {
+              description: 'alex@example.com can now join the workspace.',
+              action: { label: 'Undo', onClick: () => undefined },
+            })
+          }
+        >
+          With action
+        </Button>
+      </Row>
+      <Toaster />
+    </div>
   );
-};
-
-export { Toaster };
+}

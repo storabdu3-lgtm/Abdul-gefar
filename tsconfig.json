@@ -1,7 +1,9 @@
 {
-  "include": ["src/**/*", "mockupPreviewPlugin.ts", "vite.config.ts"],
+  "include": ["src/**/*", "vite.config.ts"],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     "target": "es2022",
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -12,9 +14,7 @@
     "jsx": "preserve",
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
-    "types": ["node", "vite/client"],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "resolveJsonModule": true,
+    "types": ["node", "vite/client"]
   }
 }

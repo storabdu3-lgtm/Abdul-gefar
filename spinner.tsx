@@ -1,15 +1,18 @@
-import { cn } from '@/lib/utils';
-import { Loader2Icon } from 'lucide-react';
+import { Button } from '../../components/ui/button';
+import { Spinner } from '../../components/ui/spinner';
+import { Row } from '../parts';
 
-function Spinner({ className, ...props }: React.ComponentProps<'svg'>) {
+export function SpinnerDemo() {
   return (
-    <Loader2Icon
-      role="status"
-      aria-label="Loading"
-      className={cn('size-4 animate-spin', className)}
-      {...props}
-    />
+    <div className="rounded-xl border bg-card p-6">
+      <Row label="Sizes and context">
+        <Spinner className="size-4" />
+        <Spinner className="size-6" />
+        <Spinner className="size-8" />
+        <Button disabled>
+          <Spinner /> Saving
+        </Button>
+      </Row>
+    </div>
   );
 }
-
-export { Spinner };

@@ -1,49 +1,24 @@
-'use client';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
+import { Row } from '../parts';
 
-import * as React from 'react';
-import * as AvatarPrimitive from '@radix-ui/react-avatar';
-import { cn } from '@/lib/utils';
-
-const Avatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Root
-    ref={ref}
-    className={cn(
-      'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full',
-      className,
-    )}
-    {...props}
-  />
-));
-Avatar.displayName = AvatarPrimitive.Root.displayName;
-
-const AvatarImage = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Image>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn('aspect-square h-full w-full', className)}
-    {...props}
-  />
-));
-AvatarImage.displayName = AvatarPrimitive.Image.displayName;
-
-const AvatarFallback = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Fallback
-    ref={ref}
-    className={cn(
-      'flex h-full w-full items-center justify-center rounded-full bg-muted',
-      className,
-    )}
-    {...props}
-  />
-));
-AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
-
-export { Avatar, AvatarImage, AvatarFallback };
+export function AvatarDemo() {
+  return (
+    <div className="rounded-xl border bg-card p-6">
+      <Row label="Sizes and fallback">
+        <Avatar className="h-8 w-8">
+          <AvatarFallback>AL</AvatarFallback>
+        </Avatar>
+        <Avatar>
+          <AvatarImage
+            src={`${import.meta.env.BASE_URL}favicon.svg`}
+            alt="Design system mark"
+          />
+          <AvatarFallback>SC</AvatarFallback>
+        </Avatar>
+        <Avatar className="h-14 w-14">
+          <AvatarFallback>DT</AvatarFallback>
+        </Avatar>
+      </Row>
+    </div>
+  );
+}

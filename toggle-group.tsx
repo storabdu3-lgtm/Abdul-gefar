@@ -1,60 +1,32 @@
-'use client';
+import { AlignCenter, AlignLeft, AlignRight } from 'lucide-react';
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from '../../components/ui/toggle-group';
+import { Stack } from '../parts';
 
-import * as React from 'react';
-import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { toggleVariants } from '@/components/ui/toggle';
-import { cn } from '@/lib/utils';
-import { type VariantProps } from 'class-variance-authority';
-
-const ToggleGroupContext = React.createContext<
-  VariantProps<typeof toggleVariants>
->({
-  size: 'default',
-  variant: 'default',
-});
-
-const ToggleGroup = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
-    VariantProps<typeof toggleVariants>
->(({ className, variant, size, children, ...props }, ref) => (
-  <ToggleGroupPrimitive.Root
-    ref={ref}
-    className={cn('flex items-center justify-center gap-1', className)}
-    {...props}
-  >
-    <ToggleGroupContext.Provider value={{ variant, size }}>
-      {children}
-    </ToggleGroupContext.Provider>
-  </ToggleGroupPrimitive.Root>
-));
-
-ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName;
-
-const ToggleGroupItem = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
-    VariantProps<typeof toggleVariants>
->(({ className, children, variant, size, ...props }, ref) => {
-  const context = React.useContext(ToggleGroupContext);
-
+export function ToggleGroupDemo() {
   return (
-    <ToggleGroupPrimitive.Item
-      ref={ref}
-      className={cn(
-        toggleVariants({
-          variant: context.variant || variant,
-          size: context.size || size,
-        }),
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </ToggleGroupPrimitive.Item>
+    <div className="max-w-sm space-y-6 rounded-xl border bg-card p-6">
+      <Stack label="Single selection">
+        <ToggleGroup type="single" defaultValue="left" variant="outline">
+          <ToggleGroupItem value="left" aria-label="Align left">
+            <AlignLeft />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="center" aria-label="Align center">
+            <AlignCenter />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="right" aria-label="Align right">
+            <AlignRight />
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </Stack>
+      <Stack label="Multiple selection">
+        <ToggleGroup type="multiple" size="sm" defaultValue={['bold']}>
+          <ToggleGroupItem value="bold">Bold</ToggleGroupItem>
+          <ToggleGroupItem value="italic">Italic</ToggleGroupItem>
+        </ToggleGroup>
+      </Stack>
+    </div>
   );
-});
-
-ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName;
-
-export { ToggleGroup, ToggleGroupItem };
+}

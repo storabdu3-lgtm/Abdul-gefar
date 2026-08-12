@@ -1,16 +1,40 @@
-import path from 'path';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import path from "path";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { buildTokens } from "./scripts/build-tokens.mjs";
 
-import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
-import { mockupPreviewPlugin } from './mockupPreviewPlugin';
+/**
+ * Regenerates src/index.css and src/generated/tokens.tsx from tokens.json on startup and
+ * whenever tokens.json changes, so editing the single source of truth
+ * hot-reloads the running app.
+ */
+function designTokensPlugin(): Plugin {
+  const tokensFile = path.resolve(import.meta.dirname, "tokens.json");
+  return {
+    name: "design-tokens",
+    buildStart() {
+      buildTokens();
+      this.addWatchFile(tokensFile);
+    },
+    configureServer(server) {
+      server.watcher.add(tokensFile);
+      server.watcher.on("change", (file) => {
+        if (path.resolve(file) === tokensFile) {
+          buildTokens();
+          server.ws.send({ type: "full-reload" });
+        }
+      });
+    },
+  };
+}
 
 const rawPort = process.env.PORT;
 
 if (!rawPort) {
   throw new Error(
-    'PORT environment variable is required but was not provided.',
+    "PORT environment variable is required but was not provided.",
   );
 }
 
@@ -24,42 +48,37 @@ const basePath = process.env.BASE_PATH;
 
 if (!basePath) {
   throw new Error(
-    'BASE_PATH environment variable is required but was not provided.',
+    "BASE_PATH environment variable is required but was not provided.",
   );
 }
 
 export default defineConfig({
   base: basePath,
   plugins: [
-    mockupPreviewPlugin(),
+    designTokensPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== 'production' &&
+    ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
-          await import('@replit/vite-plugin-cartographer').then((m) =>
+          await import("@replit/vite-plugin-cartographer").then((m) =>
             m.cartographer({
-              root: path.resolve(import.meta.dirname, '..'),
+              root: path.resolve(import.meta.dirname, ".."),
             }),
           ),
         ]
       : []),
   ],
-  resolve: {
-    alias: {
-      '@': path.resolve(import.meta.dirname, 'src'),
-    },
-  },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, 'dist'),
+    outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
   },
   server: {
     port,
     strictPort: true,
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     allowedHosts: true,
     fs: {
       strict: true,
@@ -67,7 +86,7 @@ export default defineConfig({
   },
   preview: {
     port,
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     allowedHosts: true,
   },
 });
