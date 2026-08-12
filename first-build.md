@@ -1,87 +1,113 @@
 <first_build>
-When building a new animated video for the first time, follow this exact sequence. Do not deviate.
+When building a new Expo app for the first time, follow this sequence for speed and quality.
 
-## What the scaffold provides
+**Scaffold** — these files are already opened in your context (do NOT re-read them). The scaffold also includes these components you won't see opened: `ErrorBoundary`, `ErrorFallback`, `KeyboardAwareScrollViewCompat`. Providers wired in `_layout.tsx`: SafeAreaProvider, ErrorBoundary, QueryClientProvider, GestureHandlerRootView, KeyboardProvider. Fonts: Inter (400/500/600/700) pre-loaded with SplashScreen gating. Packages pre-installed: expo-router, @expo/vector-icons, @tanstack/react-query, react-native-reanimated, react-native-keyboard-controller, react-native-gesture-handler, react-native-safe-area-context, expo-haptics.
 
-These files are already opened in your context after `createArtifact()` returns. Do NOT re-read them:
+## Build Sequence
 
-- `src/components/video/VideoTemplate.tsx` -- template with placeholder ReplitLoadingScene, `useVideoPlayer` hook wired up
-- `src/lib/video/hooks.ts` -- `useVideoPlayer` and `useSceneTimer` hooks (DO NOT MODIFY -- recording/export depends on exact implementation)
-- `src/lib/video/animations.ts` -- 40+ animation presets (springs, easings, scene transitions, element animations, kinetic typography variants)
-- `src/lib/video/index.ts` -- barrel export of hooks and animations
-- `src/index.css` -- Tailwind imports + CSS variables for colors and fonts (subagent will customize)
-- `index.html` -- HTML shell with Google Fonts preloaded
-- `src/main.tsx` -- React entry point
+1. **Generate images FIRST** — generate images using the `media-generation` skill before writing any code. This includes:
+   - App icon & splash. Copy images to `assets/images/icon.png` after generation.
+   - If the app is image-heavy (streaming, social, media, recipes, travel, etc.), also generate 2-3 content placeholder images for the initial UI (e.g., hero banners, category thumbnails, placeholder cards). Copy images to `assets/images/` after generation. Do NOT over-generate — 2-3 images max for first build content.
 
-Pre-installed packages (do NOT install these): `framer-motion`, `gsap`, `@react-spring/web`, `three`, `@react-three/fiber`, `@react-three/drei`, `lucide-react`, `tailwindcss`, `clsx`, `tailwind-merge`, `lottie-react`.
+2. **Plan the full app structure** — decide on all screens, components, context providers, navigation, and colors BEFORE writing any code. You need this plan to write everything in one batch.
 
-## Build sequence
+3. **Write ALL files in a single parallel batch** — this is critical for speed. Every new file is independent. In ONE tool call, write:
+   - If the current Artifacts state contains a design system: any missing product-agnostic native primitives in the selected design-system artifact, plus app-specific components that import those primitives directly
+   - Otherwise: `constants/colors.ts` (updated theme) and all app-local component files (cards, inputs, headers, etc.)
+   - All context/provider files
+   - All screen files (`app/index.tsx`, `app/detail.tsx`, etc.)
+   Do NOT write files one at a time. Batch every new file into a single parallel write call.
 
-Execute these 5 steps in order. No additional steps.
+4. **Update existing scaffold files in a second parallel batch** — in ONE tool call, edit:
+   - `app/_layout.tsx` (add new providers, adjust Stack screens)
+   - `app/(tabs)/_layout.tsx` (add/remove tabs, or delete if not using tabs)
+   - `app.json` (update name if needed)
 
-### Step 1: Delegate to DESIGN subagent
+5. **Install additional packages** if any are needed beyond what's pre-installed.
 
-Call `subagent()` and do not await it. Pass the user's request exactly as-is, prefixed with the skill reference. Do NOT add creative direction, color guidance, typography choices, or any other prescriptive instructions.
+6. **Restart workflow** once at the end — not before. After restarting, check logs (`refresh_all_logs`) to confirm the app is running without errors. Fix any errors before presenting.
 
-```javascript
-const videoDesignTask = `You are the subagent executing this task, see the skill: .local/skills/video-js/SKILL.md\n\n[Insert user request...]`;
-subagent({
-    name: "video-design",
-    task: videoDesignTask,
-    config: {
-        $kind: "design",
-        relevantFiles: [".local/skills/video-js/SKILL.md", ".local/skills/video-js/references/finalize-playback.md"],
-    },
-});
-```
+## First Build Rules
 
-The design subagent handles the visual animation: creative direction, asset generation (images, video clips, web-sourced reference images), scene building, CSS theming, validation (`validate-recording.sh`), and finalization (frame containment, loop integrity). You do not verify or fix its output.
+- **Expo apps default to frontend-only.** Unless the user explicitly asks for a backend, database, or server-side features, do NOT use the database, write an OpenAPI spec, run codegen, or create backend routes. Use AsyncStorage for all local persistence. This is the single most common mistake — avoid it.
+- Do NOT restart the workflow until all files are written.
+- When consuming a design system, grep for local theme imports and read and rewrite every matching scaffold file before deleting the local theme files. Otherwise, do NOT re-read scaffold files because their content is documented above.
+- Do NOT take screenshots while building — take exactly ONE at the very end after restarting the workflow to confirm the app is live (see Screenshot Rules below).
+- Every feature must be complete — no placeholder buttons or unfinished states.
+- Only use Expo Go compatible packages.
+- **Maximize parallel tool calls.** Writing 10 files sequentially is 10x slower than writing them in one batch. If files don't depend on each other, write them together.
 
-Do not ask the design subagent to generate, plan, or wire audio. Background music, audio controls, and time-synced playback are main-agent post-build work after the design subagent returns.
+## Scope Guidance
 
-### Step 2: Restart the workflow
+**Features to AVOID in the first build:**
 
-```javascript
-await restart_workflow({ name: "artifacts/<slug>: web" });
-```
+- Backend databases or servers (use AsyncStorage)
+- Complex integration with multiple third-party services
+- Push notifications
 
-### Step 3: Check logs for errors
+**Features you CAN include:**
 
-```javascript
-await refresh_all_logs();
-```
+- GenAI/External integrations (OpenAI, Anthropic, etc.)
+- Single integration use (RevenueCat, Firebase, etc.)
+- CRUD operations with AsyncStorage
+- Forms, navigation, routing
+- Native device capabilities (camera, location) when relevant
 
-Read the workflow logs. If there are build errors (missing imports, syntax errors, etc.), fix them and restart the workflow again. If the logs are clean, proceed to step 4.
+## Design Quality
 
-### Step 4: Generate default background music (main agent only -- do not delegate)
+Design quality is the top priority. Build a production-ready app with polished UI — no placeholder buttons or unfinished states. Draw inspiration from market-leading apps (Airbnb, Instagram, Notion, Apple Notes, ChatGPT Mobile).
 
-After the design subagent has finished and workflow logs are clean, generate exactly one default background music bed with the `generateMusic` callback. Do not generate voiceover/TTS or SFX unless the user explicitly requested them.
+**Component standards** — every component must be complete with proper states:
 
-Follow `.local/skills/video-js/references/audio.md` exactly for music prompting, output paths, runtime matching, extra user-requested audio, and playback wiring. Generate the audio before editing the animation controls so you know which file path the player will use.
+- Loading: Skeleton shimmer or activity indicator
+- Empty: Icon + text (no generated images, no emojis)
+- Error: Message + retry button
+- Buttons: Press feedback (opacity/scale), disabled state
+- Lists: Empty state, pull-to-refresh where appropriate
+- Forms: Validation feedback
+- Key actions: Haptic feedback via expo-haptics
 
-### Step 5: Add scene controls, audio controls, and synced audio (main agent only -- do not delegate)
+**Navigation structure:**
+The template comes with a tab bar and header, but most apps don't need them. Evaluate your app's needs:
 
-After the default music has been generated, add the interactive control bar at the bottom of the video so the viewer can jump between scenes, toggle scene-lock, and mute/unmute preview audio. The bar renders only when the video is inside an iframe (the Replit preview pane). The exporter launches the video as the top-level document, so the gate hides the bar during export and the exported frame stays clean.
+- Single-screen apps (chat, camera, simple tools): NO tabs, NO header. Delete `app/(tabs)/`, create `app/index.tsx`.
+- Multi-section apps (social, e-commerce): Tabs may be useful. Hide the header with `headerShown: false` in Tabs screenOptions.
+- Market-leading apps like Instagram, ChatGPT, WhatsApp have minimal chrome — no visible title bars.
+- Liquid glass tab bars (NativeTabs) are a major wow factor for iOS 26+ users.
 
-Follow `.local/skills/video-js/references/scene-selectors.md` for the scene-control architecture. While making those edits, follow `.local/skills/video-js/references/audio.md` in this order:
+**Design principles:**
 
-1. Add the audio controls to `VideoWithControls` and pass `muted` into `VideoTemplate`.
-2. Then wire the generated audio into `VideoTemplate` with scene-synced playback.
-3. Then run the final validation/restart/log/present sequence from `scene-selectors.md`.
+- Draw inspiration from iOS, Instagram, Airbnb, Coinbase
+- Mobile-native design patterns, not web-like designs
+- Avoid generic aesthetics (purple gradients on white, predictable layouts)
+- Every screen should feel cohesive
+- Icons over text for buttons — use @expo/vector-icons, NEVER emojis
+- Choose a font that matches the app's personality (see Typography below)
 
-Do NOT delegate this step to any subagent. Do NOT add details about scene selectors or audio to any subagent task description. The design subagent must never be informed that scene selectors or default audio exist.
+**Typography personality:**
 
-`scene-selectors.md` owns the final workflow restart, log check, and `presentArtifact` call. Once that file's steps complete, the first build is done -- do NOT restart the workflow again and do NOT call `presentArtifact` a second time.
+- Chat/AI apps: Inter, DM Sans, or Source Sans Pro for clean readability
+- Finance/Crypto: Inter, DM Sans, or Roboto for trust and clarity
+- Creative/Social: Poppins, Nunito, or Montserrat for friendliness
+- Fitness/Health: Rubik, Work Sans, or Outfit for energy
+- Notes/Productivity: Merriweather (serif) + Inter (sans) for hierarchy
 
-## First build rules
+**Color choices** are very important. Be inspired by production-level applications:
 
-- Do NOT read any files before delegation to the design subagent -- scaffold files are documented above, and the subagent's output does not need verification.
-- Do NOT add your own creative direction, style instructions, color guidance, or typography choices to the subagent task. The design subagent is the creative expert -- let it make all decisions.
-- Do NOT await the design subagent inline. The completion notification will resume you for workflow restart and scene-selector work.
-- Do NOT restart the workflow before the design subagent completes.
-- Do NOT take screenshots during the build.
-- Do NOT call `SuggestUserAction({ action: "deploy", message: "..." })` -- video artifacts are not deployable. They are exported from the preview pane.
-- Do NOT delegate finalization separately -- the design subagent handles it per `<completing_your_run>` in the skill.
-- Do NOT delegate the audio or scene-selector step. The main agent runs both directly after the design subagent finishes. The design subagent must not be told about scene selectors or default audio.
-- There is no need to test or code review the first build beyond the scene-selector validation.
+- Note Taking Apps: Notion, Apple Notes
+- AI Chatbots: ChatGPT Mobile App, Claude Mobile App
+- Social: Instagram, Twitter
+- Finance: Coinbase, Robinhood
+
+## Screenshot Rules
+
+**First build:** Take exactly ONE screenshot at the very end, after restarting the workflow, to confirm the app is live and not crashing. That is it. Do NOT screenshot repeatedly to iterate on UI or debug layout issues during the first build.
+
+**After first build (iterations):** Screenshots are allowed for verifying specific bug fixes or user-requested changes, but do NOT loop — if a screenshot shows a problem, fix the code and move on. Do NOT take another screenshot to verify the fix unless the user asks. Trust your code changes.
+
+**Web preview caveats:**
+
+- Safe area insets render differently on web vs native — content may appear clipped at top/bottom
+- The web preview runs in an iframe which affects safe area calculations
+- Do NOT debug layout issues visible only in web screenshots — these are web rendering artifacts, not real bugs. The native preview (Expo Go) is the source of truth.
 </first_build>

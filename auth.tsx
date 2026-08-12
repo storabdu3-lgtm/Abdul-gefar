@@ -1,189 +1,193 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-} from "firebase/auth";
-import { auth } from "./firebase";
-import { getAll, getById, createWithId, update, remove, COLLECTIONS } from "./firestore";
-import type { AppUser } from "./types";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
+import * as AuthSession from 'expo-auth-session';
+import * as SecureStore from 'expo-secure-store';
+import * as WebBrowser from 'expo-web-browser';
 
-export const ADMIN_EMAIL = "admin@nexusstock.com";
-export const ADMIN_PASSWORD = "Admin@123456";
+WebBrowser.maybeCompleteAuthSession();
 
-interface AuthContextType {
-  user: AppUser | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  isAdmin: boolean;
-  hasPermission: (page: string) => boolean;
-  createUser: (email: string, password: string, name: string, permissions: string[]) => Promise<void>;
-  updateUserPermissions: (uid: string, name: string, permissions: string[]) => Promise<void>;
-  deleteUser: (uid: string) => Promise<void>;
-  allUsers: AppUser[];
-  reloadUsers: () => Promise<void>;
+const AUTH_TOKEN_KEY = 'auth_session_token';
+const ISSUER_URL =
+  process.env.EXPO_PUBLIC_ISSUER_URL ?? 'https://replit.com/oidc';
+
+interface User {
+  id: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  profileImageUrl: string | null;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+interface AuthContextValue {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
+}
 
-export const ALL_PERMISSIONS = [
-  { key: "dashboard", label: "Dashboard" },
-  { key: "products", label: "Products" },
-  { key: "categories", label: "Categories" },
-  { key: "stores", label: "Stores" },
-  { key: "suppliers", label: "Suppliers" },
-  { key: "customers", label: "Customers" },
-  { key: "stock-in", label: "Stock In" },
-  { key: "pricing", label: "Pricing" },
-  { key: "pos-sales", label: "POS Sales" },
-  { key: "order-vouchers", label: "Order Vouchers" },
-  { key: "transfers", label: "Transfers" },
-  { key: "damage-returns", label: "Damage/Returns" },
-  { key: "expenses", label: "Expenses" },
-  { key: "payment-transactions", label: "Payment Transactions" },
-  { key: "store-balance", label: "Store Balance" },
-  { key: "bincard", label: "Bincard" },
-  { key: "bincard-summary", label: "Bincard Summary" },
-  { key: "reports", label: "Reports" },
-  { key: "inventory", label: "Inventory" },
-  { key: "store-requests", label: "Store Requests" },
-  { key: "accounts", label: "Accounts" },
-  { key: "promotions", label: "Promotions" },
-  { key: "direct-sales", label: "Direct Sales" },
-  { key: "binning", label: "Binning" },
-  { key: "settings", label: "Settings" },
-  { key: "delete", label: "Delete Records" },
-];
+const AuthContext = createContext<AuthContextValue>({
+  user: null,
+  isLoading: true,
+  isAuthenticated: false,
+  login: async () => {},
+  logout: async () => {},
+});
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [allUsers, setAllUsers] = useState<AppUser[]>([]);
-
-  async function loadUsers() {
-    const users = await getAll<AppUser>(COLLECTIONS.USERS);
-    setAllUsers(users);
-    return users;
+function getApiBaseUrl(): string {
+  if (process.env.EXPO_PUBLIC_DOMAIN) {
+    return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
   }
+  return '';
+}
 
-  useEffect(() => {
-    return onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          let profile = await getById<AppUser>(COLLECTIONS.USERS, firebaseUser.uid);
-          if (!profile && firebaseUser.email === ADMIN_EMAIL) {
-            const adminUser = {
-              uid: firebaseUser.uid,
-              email: ADMIN_EMAIL,
-              name: "Admin",
-              role: "admin" as const,
-              permissions: ["*"],
-            };
-            await createWithId(COLLECTIONS.USERS, firebaseUser.uid, adminUser as Record<string, unknown>);
-            profile = { ...adminUser, id: firebaseUser.uid };
-          }
-          if (profile) {
-            setUser(profile);
-            loadUsers();
-          } else {
-            setUser(null);
-            await firebaseSignOut(auth);
-          }
-        } catch {
-          setUser(null);
-        }
+function getClientId(): string {
+  return process.env.EXPO_PUBLIC_REPL_ID || '';
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const discovery = AuthSession.useAutoDiscovery(ISSUER_URL);
+
+  const redirectUri = AuthSession.makeRedirectUri();
+
+  const [request, response, promptAsync] = AuthSession.useAuthRequest(
+    {
+      clientId: getClientId(),
+      scopes: ['openid', 'email', 'profile', 'offline_access'],
+      redirectUri,
+      prompt: AuthSession.Prompt.Login,
+    },
+    discovery,
+  );
+
+  const fetchUser = useCallback(async () => {
+    try {
+      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      if (!token) {
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/auth/user`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (data.user) {
+        setUser(data.user);
       } else {
+        await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
         setUser(null);
       }
-      setLoading(false);
-    });
+    } catch {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  async function signIn(email: string, password: string) {
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  useEffect(() => {
+    if (response?.type !== 'success' || !request?.codeVerifier) return;
+
+    const { code, state } = response.params;
+
+    (async () => {
+      try {
+        const apiBase = getApiBaseUrl();
+        if (!apiBase) {
+          console.error('API base URL is not configured.');
+          return;
+        }
+
+        const exchangeRes = await fetch(
+          `${apiBase}/api/mobile-auth/token-exchange`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              code,
+              code_verifier: request.codeVerifier,
+              redirect_uri: redirectUri,
+              state,
+              nonce: request.nonce,
+            }),
+          },
+        );
+
+        if (!exchangeRes.ok) {
+          console.error('Token exchange failed:', exchangeRes.status);
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await exchangeRes.json();
+        if (data.token) {
+          await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+          setIsLoading(true);
+          await fetchUser();
+        }
+      } catch (err) {
+        console.error('Token exchange error:', err);
+        setIsLoading(false);
+      }
+    })();
+  }, [response, request, redirectUri, fetchUser]);
+
+  const login = useCallback(async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await promptAsync();
     } catch (err) {
-      const code = (err as { code?: string }).code;
-      if ((code === "auth/user-not-found" || code === "auth/invalid-credential") && email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        const credential = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
-        const uid = credential.user.uid;
-        await createWithId(COLLECTIONS.USERS, uid, {
-          uid,
-          email: ADMIN_EMAIL,
-          name: "Admin",
-          role: "admin",
-          permissions: ["*"],
-        } as Record<string, unknown>);
-      } else {
-        throw err;
-      }
+      console.error('Login error:', err);
     }
-  }
+  }, [promptAsync]);
 
-  async function signOut() {
-    await firebaseSignOut(auth);
-    setUser(null);
-  }
-
-  async function createUser(email: string, password: string, name: string, permissions: string[]) {
-    const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
-    const res = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, returnSecureToken: true }),
+  const logout = useCallback(async () => {
+    try {
+      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      if (token) {
+        const apiBase = getApiBaseUrl();
+        await fetch(`${apiBase}/api/mobile-auth/logout`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
       }
-    );
-    const data = await res.json();
-    if (!res.ok) throw new Error((data.error?.message as string) || "Failed to create user");
-    const uid = data.localId as string;
-    await createWithId(COLLECTIONS.USERS, uid, {
-      uid,
-      email,
-      name,
-      role: "user",
-      permissions,
-    } as Record<string, unknown>);
-    await loadUsers();
-  }
-
-  async function updateUserPermissions(uid: string, name: string, permissions: string[]) {
-    await update(COLLECTIONS.USERS, uid, { name, permissions } as Record<string, unknown>);
-    await loadUsers();
-  }
-
-  async function deleteUser(uid: string) {
-    await remove(COLLECTIONS.USERS, uid);
-    await loadUsers();
-  }
-
-  async function reloadUsers() {
-    await loadUsers();
-  }
-
-  const isAdmin = user?.role === "admin";
-
-  function hasPermission(page: string): boolean {
-    if (!user) return false;
-    if (user.role === "admin") return true;
-    return user.permissions.includes("*") || user.permissions.includes(page);
-  }
+    } catch {
+    } finally {
+      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+      setUser(null);
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{
-      user, loading, signIn, signOut, isAdmin, hasPermission,
-      createUser, updateUserPermissions, deleteUser, allUsers, reloadUsers,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isAuthenticated: !!user,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
+export function useAuth(): AuthContextValue {
+  return useContext(AuthContext);
 }
