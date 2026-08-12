@@ -1,146 +1,204 @@
-import { useEffect, useState, type ComponentType } from "react";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect } from "react";
+import { AuthProvider, useAuth } from "@/lib/auth";
+import NotFound from "@/pages/not-found";
+import { Layout } from "@/components/Layout";
+import Dashboard from "@/pages/Dashboard";
+import Products from "@/pages/Products";
+import Categories from "@/pages/Categories";
+import Stores from "@/pages/Stores";
+import Suppliers from "@/pages/Suppliers";
+import Customers from "@/pages/Customers";
+import StockIn from "@/pages/StockIn";
+import Pricing from "@/pages/Pricing";
+import PosSales from "@/pages/PosSales";
+import Ecommerce from "@/pages/Ecommerce";
+import OrderVouchers from "@/pages/OrderVouchers";
+import Transfers from "@/pages/Transfers";
+import DamageReturns from "@/pages/DamageReturns";
+import Expenses from "@/pages/Expenses";
+import StoreBalance from "@/pages/StoreBalance";
+import Bincard from "@/pages/Bincard";
+import BincardSummary from "@/pages/BincardSummary";
+import Reports from "@/pages/Reports";
+import Inventory from "@/pages/Inventory";
+import PaymentTransactions from "@/pages/PaymentTransactions";
+import UserManagement from "@/pages/UserManagement";
+import StoreRequests from "@/pages/StoreRequests";
+import Accounts from "@/pages/Accounts";
+import Promotions from "@/pages/Promotions";
+import DirectSales from "@/pages/DirectSales";
+import Binning from "@/pages/Binning";
+import Settings from "@/pages/Settings";
+import Login from "@/pages/Login";
 
-import { modules as discoveredModules } from "./.generated/mockup-components";
+const queryClient = new QueryClient();
 
-type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
-
-function _resolveComponent(
-  mod: Record<string, unknown>,
-  name: string,
-): ComponentType | undefined {
-  const fns = Object.values(mod).filter(
-    (v) => typeof v === "function",
-  ) as ComponentType[];
+function AccessDenied() {
   return (
-    (mod.default as ComponentType) ||
-    (mod.Preview as ComponentType) ||
-    (mod[name] as ComponentType) ||
-    fns[fns.length - 1]
-  );
-}
-
-function PreviewRenderer({
-  componentPath,
-  modules,
-}: {
-  componentPath: string;
-  modules: ModuleMap;
-}) {
-  const [Component, setComponent] = useState<ComponentType | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    setComponent(null);
-    setError(null);
-
-    async function loadComponent(): Promise<void> {
-      const key = `./components/mockups/${componentPath}.tsx`;
-      const loader = modules[key];
-      if (!loader) {
-        setError(`No component found at ${componentPath}.tsx`);
-        return;
-      }
-
-      try {
-        const mod = await loader();
-        if (cancelled) {
-          return;
-        }
-        const name = componentPath.split("/").pop()!;
-        const comp = _resolveComponent(mod, name);
-        if (!comp) {
-          setError(
-            `No exported React component found in ${componentPath}.tsx\n\nMake sure the file has at least one exported function component.`,
-          );
-          return;
-        }
-        setComponent(() => comp);
-      } catch (e) {
-        if (cancelled) {
-          return;
-        }
-
-        const message = e instanceof Error ? e.message : String(e);
-        setError(`Failed to load preview.\n${message}`);
-      }
-    }
-
-    void loadComponent();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [componentPath, modules]);
-
-  if (error) {
-    return (
-      <pre style={{ color: "red", padding: "2rem", fontFamily: "system-ui" }}>
-        {error}
-      </pre>
-    );
-  }
-
-  if (!Component) return null;
-
-  return <Component />;
-}
-
-function getBasePath(): string {
-  return import.meta.env.BASE_URL.replace(/\/$/, "");
-}
-
-function getPreviewExamplePath(): string {
-  const basePath = getBasePath();
-  return `${basePath}/preview/ComponentName`;
-}
-
-function Gallery() {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
-      <div className="text-center max-w-md">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-3">
-          Component Preview Server
-        </h1>
-        <p className="text-gray-500 mb-4">
-          This server renders individual components for the workspace canvas.
-        </p>
-        <p className="text-sm text-gray-400">
-          Access component previews at{" "}
-          <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-            {getPreviewExamplePath()}
-          </code>
-        </p>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+      <div className="text-5xl mb-4">🔒</div>
+      <h2 className="text-xl font-bold mb-2">Access Denied</h2>
+      <p className="text-muted-foreground text-sm">
+        You don't have permission to view this page.<br />
+        Contact your admin to request access.
+      </p>
     </div>
   );
 }
 
-function getPreviewPath(): string | null {
-  const basePath = getBasePath();
-  const { pathname } = window.location;
-  const local =
-    basePath && pathname.startsWith(basePath)
-      ? pathname.slice(basePath.length) || "/"
-      : pathname;
-  const match = local.match(/^\/preview\/(.+)$/);
-  return match ? match[1] : null;
+function RequireAuth({ page, children }: { page: string; children: React.ReactNode }) {
+  const { user, loading, hasPermission } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!loading && !user) setLocation("/login");
+  }, [user, loading]);
+
+  if (loading) return null;
+  if (!user) return null;
+  if (!hasPermission(page)) return <AccessDenied />;
+  return <>{children}</>;
+}
+
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const { user, loading, isAdmin } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!loading && !user) setLocation("/login");
+  }, [user, loading]);
+
+  if (loading) return null;
+  if (!user) return null;
+  if (!isAdmin) return <AccessDenied />;
+  return <>{children}</>;
+}
+
+function DashboardRouter() {
+  const { user, loading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!loading && !user) setLocation("/login");
+  }, [user, loading]);
+
+  if (loading) return null;
+  if (!user) return null;
+
+  return (
+    <Layout>
+      <Switch>
+        <Route path="/dashboard">
+          <RequireAuth page="dashboard"><Dashboard /></RequireAuth>
+        </Route>
+        <Route path="/products">
+          <RequireAuth page="products"><Products /></RequireAuth>
+        </Route>
+        <Route path="/categories">
+          <RequireAuth page="categories"><Categories /></RequireAuth>
+        </Route>
+        <Route path="/stores">
+          <RequireAuth page="stores"><Stores /></RequireAuth>
+        </Route>
+        <Route path="/suppliers">
+          <RequireAuth page="suppliers"><Suppliers /></RequireAuth>
+        </Route>
+        <Route path="/customers">
+          <RequireAuth page="customers"><Customers /></RequireAuth>
+        </Route>
+        <Route path="/stock-in">
+          <RequireAuth page="stock-in"><StockIn /></RequireAuth>
+        </Route>
+        <Route path="/pricing">
+          <RequireAuth page="pricing"><Pricing /></RequireAuth>
+        </Route>
+        <Route path="/pos-sales">
+          <RequireAuth page="pos-sales"><PosSales /></RequireAuth>
+        </Route>
+        <Route path="/order-vouchers">
+          <RequireAuth page="order-vouchers"><OrderVouchers /></RequireAuth>
+        </Route>
+        <Route path="/transfers">
+          <RequireAuth page="transfers"><Transfers /></RequireAuth>
+        </Route>
+        <Route path="/damage-returns">
+          <RequireAuth page="damage-returns"><DamageReturns /></RequireAuth>
+        </Route>
+        <Route path="/expenses">
+          <RequireAuth page="expenses"><Expenses /></RequireAuth>
+        </Route>
+        <Route path="/payment-transactions">
+          <RequireAuth page="payment-transactions"><PaymentTransactions /></RequireAuth>
+        </Route>
+        <Route path="/store-balance">
+          <RequireAuth page="store-balance"><StoreBalance /></RequireAuth>
+        </Route>
+        <Route path="/bincard">
+          <RequireAuth page="bincard"><Bincard /></RequireAuth>
+        </Route>
+        <Route path="/bincard-summary">
+          <RequireAuth page="bincard-summary"><BincardSummary /></RequireAuth>
+        </Route>
+        <Route path="/reports">
+          <RequireAuth page="reports"><Reports /></RequireAuth>
+        </Route>
+        <Route path="/inventory">
+          <RequireAuth page="inventory"><Inventory /></RequireAuth>
+        </Route>
+        <Route path="/store-requests">
+          <RequireAuth page="store-requests"><StoreRequests /></RequireAuth>
+        </Route>
+        <Route path="/accounts">
+          <RequireAuth page="accounts"><Accounts /></RequireAuth>
+        </Route>
+        <Route path="/promotions">
+          <RequireAuth page="promotions"><Promotions /></RequireAuth>
+        </Route>
+        <Route path="/direct-sales">
+          <RequireAuth page="direct-sales"><DirectSales /></RequireAuth>
+        </Route>
+        <Route path="/binning">
+          <RequireAuth page="binning"><Binning /></RequireAuth>
+        </Route>
+        <Route path="/settings">
+          <RequireAuth page="settings"><Settings /></RequireAuth>
+        </Route>
+        <Route path="/users">
+          <RequireAdmin><UserManagement /></RequireAdmin>
+        </Route>
+        <Route><NotFound /></Route>
+      </Switch>
+    </Layout>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <Switch>
+      <Route path="/"><Ecommerce /></Route>
+      <Route path="/login"><Login /></Route>
+      <Route><DashboardRouter /></Route>
+    </Switch>
+  );
 }
 
 function App() {
-  const previewPath = getPreviewPath();
-
-  if (previewPath) {
-    return (
-      <PreviewRenderer
-        componentPath={previewPath}
-        modules={discoveredModules}
-      />
-    );
-  }
-
-  return <Gallery />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </WouterRouter>
+        <Toaster />
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
 }
 
 export default App;
