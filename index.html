@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Per-design-system entry. Every mockup in this folder's mockups/ directory is
-  served from here at /__mockup/src/ds/<ds-slug>/#/<ComponentName>.
-
-  Mirrors the mockup sandbox's own index.html (same font bundle and loading
-  strategy) so previews render identically. The only intentional differences:
-  this page loads ONLY ./styles.css (this one design system, never the sandbox's
-  src/index.css, so the frame carries exactly one Tailwind build and token set)
-  and ./main.tsx (this entry's own shell). See the mockup-sandbox skill.
+  This file is the entry for ALL routes, including /preview/* canvas iframes.
+  Fonts are loaded here as non-blocking <link> tags (not CSS @import, which is render-blocking).
 -->
 <html lang="en" style="height: 100%">
   <head>
@@ -32,6 +26,6 @@
   </head>
   <body style="height: 100%; margin: 0">
     <div id="root" style="height: 100%"></div>
-    <script type="module" src="./main.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
