@@ -1,0 +1,93 @@
+modules = ["nodejs-24", "python-base-3.13"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 8081
+externalPort = 80
+
+[[ports]]
+localPort = 8082
+externalPort = 3002
+
+[[ports]]
+localPort = 8083
+externalPort = 3001
+
+[[ports]]
+localPort = 8084
+externalPort = 5000
+
+[[ports]]
+localPort = 8085
+externalPort = 6800
+
+[[ports]]
+localPort = 8086
+externalPort = 8081
+
+[[ports]]
+localPort = 8087
+externalPort = 8000
+
+[[ports]]
+localPort = 20957
+externalPort = 3000
+
+[[ports]]
+localPort = 20958
+externalPort = 3003
+
+[[ports]]
+localPort = 20959
+externalPort = 4200
+
+[[ports]]
+localPort = 20960
+externalPort = 5173
+
+[[ports]]
+localPort = 20961
+externalPort = 6000
+
+[[ports]]
+localPort = 20962
+externalPort = 8008
+
+[[ports]]
+localPort = 20963
+externalPort = 8099
+
+[userenv]
+
+[userenv.shared]
+VITE_FIREBASE_API_KEY = "AIzaSyDPa9hgqw2bTK9HEZ6QKHBNt1XgbOMaPFU"
+VITE_FIREBASE_AUTH_DOMAIN = "inventory-new-106c1.firebaseapp.com"
+VITE_FIREBASE_PROJECT_ID = "inventory-new-106c1"
+VITE_FIREBASE_STORAGE_BUCKET = "inventory-new-106c1.firebasestorage.app"
+VITE_FIREBASE_MESSAGING_SENDER_ID = "992345560828"
+VITE_FIREBASE_APP_ID = "1:992345560828:web:ee932315ea2d99a79ea979"
+VITE_CLOUDINARY_CLOUD_NAME = "dis7rvtue"
+VITE_CLOUDINARY_API_KEY = "111667275463158"
+VITE_CLOUDINARY_UPLOAD_PRESET = "inventory_upload"
