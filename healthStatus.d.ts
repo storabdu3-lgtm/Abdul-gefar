@@ -5,5 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export * from "./healthStatus";
-//# sourceMappingURL=index.d.ts.map
+export interface HealthStatus {
+    status: string;
+}
+//# sourceMappingURL=healthStatus.d.ts.map
