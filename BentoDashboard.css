@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+.bento-dashboard-wrapper {
+  font-family: 'Outfit', sans-serif;
+  background-color: #f1f5f9;
+  min-height: 100dvh;
+}
+
+.bento-card {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 24px;
+  box-shadow: 0 4px 24px -4px rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.bento-card:hover {
+  box-shadow: 0 12px 32px -4px rgba(0,0,0,0.06);
+  transform: translateY(-2px);
+}
+
+.bento-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.bento-gradient-text {
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom scrollbar for the alerts area */
+.bento-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.bento-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.bento-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.bento-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+}
+
+.metric-trend-up {
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+.metric-trend-down {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
